@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# simple templating engine in POSIX shell
+
+template() {
+    text="$1"
+    while [ "${text#*\{\{}" != "$text" ]; do
+        variable=$(echo $text | grep -Po "(?<=\{\{).*?(?=\}\})" | head -1)
+        prefix=$(echo "$text" | grep -Pzo "(?s).*(?={{$variable}})" | tr '\0' '\n')
+        suffix=$(echo "$text" | grep -Pzo "(?s)(?<={{$variable}}).*" | tr '\0' '\n')
+        eval value="\$$variable"
+        text="$prefix$value$suffix"
+    done
+    echo "$text"
+}
